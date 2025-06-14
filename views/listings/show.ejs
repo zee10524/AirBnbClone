@@ -5,45 +5,136 @@
             <div class="col-lg-7 col-md-9">
                 <h2 class="mb-4 text-center">Listing Details</h2>
                 <div class="card mb-4 shadow">
-                    <img src="<%= listing.image.url %>" class="card-img-top rounded-top" alt="Listing image" style="object-fit:cover; height:350px;">
+                    <img 
+                        src="<%= listing.image.url %>" 
+                        class="card-img-top rounded-top" 
+                        alt="Listing image" 
+                        style="object-fit:cover; height:350px;"
+                    >
                     <div class="card-body">
                         <h4 class="card-title mb-2"><%= listing.title %></h4>
                         <p class="card-text text-muted mb-3"><%= listing.description %></p>
                         <ul class="list-group list-group-flush mb-3">
-                            <li class="list-group-item"><strong>Price:</strong> <span class="text-success">&#8377;<%= listing.price %></span></li>
-                            <li class="list-group-item"><strong>Location:</strong> <%= listing.location %></li>
-                            <li class="list-group-item"><strong>Country:</strong> <%= listing.country %></li>
+                            <li class="list-group-item">
+                                <strong>Price:</strong> 
+                                <span class="text-success">&#8377;<%= listing.price %></span>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Location:</strong> <%= listing.location %>
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Country:</strong> <%= listing.country %>
+                            </li>
                         </ul>
                         <div class="d-flex gap-2">
-                            <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-primary flex-fill">Edit</a>
-                            <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="flex-fill" onsubmit="return confirm('Are you sure you want to delete this listing?');">
-                                <button type="submit" class="btn btn-outline-danger w-100">Delete</button>
+                            <a 
+                                href="/listings/<%= listing._id %>/edit" 
+                                class="btn btn-outline-primary flex-fill"
+                            >
+                                Edit
+                            </a>
+                            <form 
+                                method="POST" 
+                                action="/listings/<%= listing._id %>?_method=DELETE" 
+                                class="flex-fill" 
+                                onsubmit="return confirm('Are you sure you want to delete this listing?');"
+                            >
+                                <button 
+                                    type="submit" 
+                                    class="btn btn-outline-danger w-100"
+                                >
+                                    Delete
+                                </button>
                             </form>
                         </div>
                     </div>                    
                 </div>
 
-                <div class="col-8 offset-3 mb-3">
-                    <hr>
-                    <h4>Leave a Review</h4>
-                    <form action="/listings/<%= listing._id %>/reviews" method="post">
-                        <div class="mb-3 mt-3">
-                            <label for = "rating" class="form-label">Rating</label>
-                            <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range">
-                        </div>
-                        <div class="mb-3 mt-3">
-                            <label for="comment">Comments</label>
-                            <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control">
-                            </textarea>
-                        </div>
-                        <button class="btn btn-outline-dark">Submit</button>
-                    </form>
+                <!-- ✅ FIXED REVIEW FORM START -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4>Leave a Review</h4>
+                        <form 
+                            action="/listings/<%= listing._id %>/reviews" 
+                            method="post" 
+                            novalidate 
+                            class="needs-validation"
+                        >
+                            <div class="mb-3 mt-3">
+                                <label for="rating" class="form-label">Rating</label>
+                                <input 
+                                    type="text"
+                                    min="1" 
+                                    max="5" 
+                                    id="rating" 
+                                    name="review[rating]" 
+                                    class="form-control" 
+                                    required
+                                >
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label for="comment">Comments</label>
+                                <textarea 
+                                    name="review[comment]" 
+                                    id="comment" 
+                                    cols="30" 
+                                    rows="5" 
+                                    class="form-control" 
+                                    required
+                                ></textarea>
+                                <div class="invalid-feedback">
+                                    Please submit some comment for review
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-dark">Submit</button>
+                        </form>
+                    </div>
                 </div>
+
+                <h4 class="mb-3">All Reviews</h4>
+                <% if (listing.reviews && listing.reviews.length > 0) { %>
+                    <div class="list-group mb-3">
+                        <% listing.reviews.forEach(function(review, idx) { %>
+                            <div class="list-group-item list-group-item-action flex-column align-items-start mb-2 shadow-sm rounded">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <span>
+                                        <strong>Rating:</strong>
+                                        <% for(let i = 1; i <= 5; i++) { %>
+                                            <% if(i <= review.rating) { %>
+                                                <span class="text-warning">&#9733;</span>
+                                            <% } else { %>
+                                                <span class="text-secondary">&#9734;</span>
+                                            <% } %>
+                                        <% } %>
+                                    </span>
+                                    <small class="text-muted">Review #<%= idx + 1 %></small>
+                                </div>
+                                <p class="mb-1 mt-2"><strong>Comment:</strong> <%= review.comment %></p>
+                                <form
+                                    class="mb-3"
+                                    method="POST"
+                                    action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+                                    onsubmit="return confirm('Are you sure you want to delete this review?');"
+                                >
+                                    <button class="btn btn-sm btn-dark" type="submit">Delete</button>
+                                </form>
+                            </div>
+                            
+                        <% }); %>
+                       
+                    </div>
+                <% } else { %>
+                    <div class="alert alert-info" role="alert">
+                        No reviews yet. Be the first to review!
+                    </div>
+                <% } %>
+                <!-- ✅ FIXED REVIEW FORM END -->
 
                 <div class="text-center">
                     <a href="/listings" class="btn btn-secondary">Back to Listings</a>
                 </div>
             </div>
         </div>
+        
     </div>
-</body> 
+</body>
