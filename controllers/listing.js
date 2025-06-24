@@ -23,10 +23,16 @@ module.exports.showListing =async (req, res) => {
 }
 
 module.exports.createListing =async (req, res) => {
+
+    let url = req.file.path;
+    let filename = req.file.filename;
+    // console.log(url,"..",filename);
+
     const newListing = new Listing(req.body.listing);
-    newListing.owner= req.user._id;
+    newListing.owner=req.user._id;
+    newListing.image={url,filename};
     await newListing.save();
-    // res.locals.success = req.flash("success");
+  
    req.flash("success", "New listing created successfully!");
    res.redirect("/listings");
 
@@ -39,13 +45,26 @@ module.exports.renderEditForm =async (req, res) => {
         req.flash("error", "Listing you requested for does not exist");
         return res.redirect("/listings");
     }
-    res.render("listings/edit", { listing }); // ✅ fixed path
+
+    let originalImageUrl = listing.image.url;
+    originalImageUrl = originalImageUrl.replace("/upload", "/upload/w_100");
+    res.render("listings/edit", { listing , originalImageUrl}); // ✅ fixed path
 }
 
 module.exports.updateListing =async (req, res) => {
     const { id } = req.params;
-    const updatedData = { ...req.body.listing };
-    await Listing.findByIdAndUpdate(id, updatedData);
+    let listing = await Listing.findByIdAndUpdate(id, {...req.body.listing});
+
+    let url = req.file.path;
+    let filename = req.file.filename;
+
+    if(typeof req.file != "undefined"){
+        let url = req.file.path;
+        let filename=req.file.filename;
+        listing.image={url,filename};
+        await listing.save();
+    }
+   
     req.flash("success", "Listing Updated!");
     res.redirect(`/listings/${id}`);
 }

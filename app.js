@@ -1,9 +1,16 @@
+if(process.env.NODE_ENV != "production"){
+    require("dotenv").config();
+}
+console.log(process.env.secret);
+
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const path = require("path");
+
 
 const ExpressError = require("./utils/ExpressError");
 const session = require("express-session");
@@ -14,7 +21,8 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js")
 
 const Listing = require("./models/listing.js");
-
+const multer = require("multer");
+const upload =multer({dest: 'uploads/'});
 
 const port = 8080;
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
@@ -78,7 +86,6 @@ app.use((req,res,next)=>{
     res.locals.currUser = req.user;
     next();
 })
-
 // Routes
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
